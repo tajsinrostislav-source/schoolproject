@@ -1,5 +1,5 @@
 /* ============================================================
-   ЗВУКИ (Web Audio API — без файлов, мягкие и тихие)
+   ЗВУКИ (Web Audio API)
    ============================================================ */
 let audioCtx = null;
 
@@ -24,34 +24,25 @@ function playTone(frequency, duration, volume = 0.08, type = 'sine') {
     gain.connect(ctx.destination);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + duration);
-  } catch (e) { /* браузер не поддерживает — тихо игнорим */ }
+  } catch (e) { }
 }
 
-// Мягкий приятный звук победы (восходящее трезвучие)
 function playWinSound() {
-  playTone(523.25, 0.15, 0.07); // C5
-  setTimeout(() => playTone(659.25, 0.15, 0.07), 120); // E5
-  setTimeout(() => playTone(783.99, 0.35, 0.07), 240); // G5
+  playTone(523.25, 0.15, 0.07);
+  setTimeout(() => playTone(659.25, 0.15, 0.07), 120);
+  setTimeout(() => playTone(783.99, 0.35, 0.07), 240);
 }
 
-// Мягкий звук поражения (нисходящий, не резкий)
 function playLoseSound() {
-  playTone(392.00, 0.18, 0.07); // G4
-  setTimeout(() => playTone(311.13, 0.30, 0.06), 150); // Eb4
+  playTone(392.00, 0.18, 0.07);
+  setTimeout(() => playTone(311.13, 0.30, 0.06), 150);
 }
 
-// Короткий клик при правильном действии
-function playCorrectSound() {
-  playTone(880, 0.08, 0.05);
-}
-
-// Короткий клик при ошибке
-function playWrongSound() {
-  playTone(220, 0.12, 0.05, 'triangle');
-}
+function playCorrectSound() { playTone(880, 0.08, 0.05); }
+function playWrongSound() { playTone(220, 0.12, 0.05, 'triangle'); }
 
 /* ============================================================
-   КОНФЕТТИ (простая реализация на canvas)
+   КОНФЕТТИ
    ============================================================ */
 function launchConfetti() {
   const canvas = document.createElement('canvas');
@@ -65,15 +56,11 @@ function launchConfetti() {
   const pieces = [];
   for (let i = 0; i < 120; i++) {
     pieces.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * -canvas.height,
-      w: 6 + Math.random() * 6,
-      h: 8 + Math.random() * 8,
+      x: Math.random() * canvas.width, y: Math.random() * -canvas.height,
+      w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
       color: colors[Math.floor(Math.random() * colors.length)],
-      vy: 2 + Math.random() * 4,
-      vx: -2 + Math.random() * 4,
-      rot: Math.random() * 360,
-      vr: -8 + Math.random() * 16
+      vy: 2 + Math.random() * 4, vx: -2 + Math.random() * 4,
+      rot: Math.random() * 360, vr: -8 + Math.random() * 16
     });
   }
 
@@ -82,28 +69,21 @@ function launchConfetti() {
     frame++;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     pieces.forEach(p => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.rot += p.vr;
-      p.vy += 0.08;
-      ctx.save();
-      ctx.translate(p.x, p.y);
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += 0.08;
+      ctx.save(); ctx.translate(p.x, p.y);
       ctx.rotate(p.rot * Math.PI / 180);
       ctx.fillStyle = p.color;
       ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
       ctx.restore();
     });
-    if (frame < 180) {
-      requestAnimationFrame(animate);
-    } else {
-      canvas.remove();
-    }
+    if (frame < 180) requestAnimationFrame(animate);
+    else canvas.remove();
   }
   animate();
 }
 
 /* ============================================================
-   ТЕМА (тёмная / светлая) + сохранение
+   ТЕМА И ОЧКИ
    ============================================================ */
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -118,9 +98,6 @@ function toggleTheme() {
   playCorrectSound();
 }
 
-/* ============================================================
-   ОБЩИЕ ФУНКЦИИ (очки, уровни, рекорд)
-   ============================================================ */
 let score = 0;
 let level = 1;
 let bestScore = parseInt(localStorage.getItem('erudit-best') || '0');
@@ -147,9 +124,45 @@ function showTab(id, btn) {
 }
 
 /* ============================================================
-   ВИКТОРИНА — БАЗА ВОПРОСОВ ПО КЛАССАМ (4–11)
+   ВИКТОРИНА — БАЗА ВОПРОСОВ ПО КЛАССАМ (1–11)
    ============================================================ */
 const quizData = {
+  1: [
+    { q: "Сколько будет 2 + 2?", a: ["3", "4", "5", "6"], correct: 1 },
+    { q: "Какого цвета трава летом?", a: ["Красная", "Синяя", "Зелёная", "Жёлтая"], correct: 2 },
+    { q: "Сколько букв в слове «Кот»?", a: ["2", "3", "4", "5"], correct: 1 },
+    { q: "Кто говорит «Мяу»?", a: ["Собака", "Корова", "Кошка", "Петух"], correct: 2 },
+    { q: "Какое время года самое холодное?", a: ["Лето", "Зима", "Весна", "Осень"], correct: 1 },
+    { q: "Сколько пальцев на одной руке?", a: ["4", "5", "6", "10"], correct: 1 },
+    { q: "Что светит днём на небе?", a: ["Луна", "Звёзды", "Солнце", "Фонарь"], correct: 2 },
+    { q: "Какое животное самое большое?", a: ["Слон", "Кошка", "Мышка", "Собака"], correct: 0 },
+    { q: "Сколько будет 5 - 1?", a: ["3", "4", "5", "6"], correct: 1 },
+    { q: "Какой формы мяч?", a: ["Квадратный", "Круглый", "Треугольный", "Овальный"], correct: 1 }
+  ],
+  2: [
+    { q: "Сколько будет 10 + 5?", a: ["13", "14", "15", "16"], correct: 2 },
+    { q: "В какое время года идёт снег?", a: ["Летом", "Зимой", "Весной", "Осенью"], correct: 1 },
+    { q: "Сколько дней в неделе?", a: ["5", "6", "7", "8"], correct: 2 },
+    { q: "Какая буква первая в алфавите?", a: ["Б", "А", "В", "Я"], correct: 1 },
+    { q: "Кто живёт в будке?", a: ["Кошка", "Собака", "Птица", "Рыба"], correct: 1 },
+    { q: "Сколько лап у кошки?", a: ["2", "3", "4", "5"], correct: 2 },
+    { q: "Что мы едим на завтрак?", a: ["Суп", "Кашу", "Шашлык", "Торт"], correct: 1 },
+    { q: "Какого цвета небо в ясный день?", a: ["Зелёное", "Голубое", "Красное", "Чёрное"], correct: 1 },
+    { q: "Сколько будет 20 - 10?", a: ["5", "10", "15", "20"], correct: 1 },
+    { q: "Как зовут героя, который живёт на крыше?", a: ["Чебурашка", "Карлсон", "Буратино", "Незнайка"], correct: 1 }
+  ],
+  3: [
+    { q: "Сколько будет 8 × 2?", a: ["14", "16", "18", "20"], correct: 1 },
+    { q: "На какой планете мы живём?", a: ["Марс", "Юпитер", "Земля", "Венера"], correct: 2 },
+    { q: "Кто написал сказку «Золотой ключик»?", a: ["Толстой", "Пушкин", "Андерсен", "Братья Гримм"], correct: 0 },
+    { q: "Сколько месяцев в году?", a: ["10", "11", "12", "13"], correct: 2 },
+    { q: "Что нужно растениям для роста?", a: ["Вода и свет", "Только вода", "Только свет", "Ничего"], correct: 0 },
+    { q: "Сколько минут в одном часе?", a: ["30", "45", "60", "90"], correct: 2 },
+    { q: "Какая самая длинная река в России?", a: ["Волга", "Обь", "Лена", "Амур"], correct: 2 },
+    { q: "Как называется столица России?", a: ["Питер", "Москва", "Казань", "Сочи"], correct: 1 },
+    { q: "Сколько сторон у квадрата?", a: ["3", "4", "5", "6"], correct: 1 },
+    { q: "Кто из животных впадает в спячку зимой?", a: ["Заяц", "Волк", "Медведь", "Лиса"], correct: 2 }
+  ],
   4: [
     { q: "Сколько будет 7 × 8?", a: ["54", "56", "48", "64"], correct: 1 },
     { q: "Какое животное называют «царём зверей»?", a: ["Тигр", "Слон", "Лев", "Медведь"], correct: 2 },
@@ -253,11 +266,10 @@ let quizCurrent = 0;
 let quizScore = 0;
 let quizActive = false;
 let currentQuizQuestions = [];
-
 function initGrades() {
   const grid = document.getElementById('gradesGrid');
   grid.innerHTML = '';
-  for (let grade = 4; grade <= 11; grade++) {
+  for (let grade = 1; grade <= 11; grade++) {
     const btn = document.createElement('button');
     btn.className = 'grade-btn';
     btn.innerHTML = `${grade}<span class="grade-sub">класс</span>`;
@@ -658,14 +670,11 @@ function showRandomFact() {
    ИНИЦИАЛИЗАЦИЯ
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Тема
   const savedTheme = localStorage.getItem('erudit-theme') || 'light';
   applyTheme(savedTheme);
 
-  // Рекорд
   document.getElementById('bestScore').textContent = bestScore;
 
-  // Игры
   initGrades();
   initMemory();
   initWord();
